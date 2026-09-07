@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassFlow｜課程日期計算器</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif;
+      background: #f5f6fa;
+      color: #222;
+    }
+
+    header {
+      background: white;
+      padding: 28px 20px 22px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px 16px 40px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .label {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .day {
+      padding: 12px 5px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+
+    .day.active {
+      background: #333;
+      color: white;
+      border-color: #333;
+    }
+
+    .calculate {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: #333;
+      color: white;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .result {
+      display: none;
+      text-align: center;
+    }
+
+    .result-date {
+      font-size: 30px;
+      font-weight: 700;
+      margin: 12px 0;
+    }
+
+    .result-text {
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">📚 ClassFlow</div>
+  <div class="subtitle">課程日期計算器</div>
+</header>
+
+<main>
+
+  <div class="card">
+    <div class="label">📅 課程開始日期</div>
+    <input type="date" id="startDate">
+  </div>
+
+  <div class="card">
+    <div class="label">🗓️ 上課日</div>
+
+    <div class="days">
+      <button class="day" data-day="1">一</button>
+      <button class="day" data-day="2">二</button>
+      <button class="day" data-day="3">三</button>
+      <button class="day" data-day="4">四</button>
+      <button class="day" data-day="5">五</button>
+      <button class="day" data-day="6">六</button>
+      <button class="day" data-day="0">日</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">🔢 課程堂數</div>
+    <input type="number" id="lessonCount" min="1" value="16">
+  </div>
+
+  <div class="card">
+    <button class="calculate" onclick="calculateDate()">
+      ✨ 開始計算
+    </button>
+  </div>
+
+  <div class="card result" id="result">
+    <div class="label">🎯 預計最後一堂課</div>
+
+    <div class="result-date" id="resultDate">-</div>
+
+    <div class="result-text" id="resultText"></div>
+  </div>
+
+</main>
+
+<script>
+  const selectedDays = new Set();
+
+  document.querySelectorAll(".day").forEach(button => {
+    button.addEventListener("click", () => {
+      const day = Number(button.dataset.day);
+
+      if (selectedDays.has(day)) {
+        selectedDays.delete(day);
+        button.classList.remove("active");
+      } else {
+        selectedDays.add(day);
+        button.classList.add("active");
+      }
+    });
+  });
+
+  function calculateDate() {
+    const startValue = document.getElementById("startDate").value;
+    const lessonCount = Number(
+      document.getElementById("lessonCount").value
+    );
+
+    if (!startValue) {
+      alert("請選擇課程開始日期！");
+      return;
+    }
+
+    if (selectedDays.size === 0) {
+      alert("請至少選擇一個上課日！");
+      return;
+    }
+
+    if (!lessonCount || lessonCount < 1) {
+      alert("請輸入正確的課程堂數！");
+      return;
+    }
+
+    let currentDate = new Date(startValue + "T00:00:00");
+    let count = 0;
+
+    while (count < lessonCount) {
+      const day = currentDate.getDay();
+
+      if (selectedDays.has(day)) {
+        count++;
+      }
+
+      if (count < lessonCount) {
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    const year = currentDate.getFullYear();
+    const month = String(
+      currentDate.getMonth() + 1
+    ).padStart(2, "0");
+
+    const date = String(
+      currentDate.getDate()
+    ).padStart(2, "0");
+
+    document.getElementById("resultDate").textContent =
+      `${year}/${month}/${date}`;
+
+    document.getElementById("resultText").textContent =
+      `共計 ${lessonCount} 堂課`;
+
+    document.getElementById("result").style.display = "block";
+  }
+</script>
+
+</body>
+</html>
