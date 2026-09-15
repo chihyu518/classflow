@@ -1,652 +1,536 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassFlow 課程日期計算器</title>
 
-<title>ClassFlow 課程管理</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-* {
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f7f7f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans TC", sans-serif;
+      color: #333;
+    }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
-               "Microsoft JhengHei", sans-serif;
-  background: linear-gradient(135deg, #f5efff, #eee7ff);
-  color: #333;
-}
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
 
-.container {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 25px 16px 50px;
-}
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-size: 26px;
+    }
 
-h1 {
-  text-align: center;
-  color: #7656b8;
-  margin-bottom: 6px;
-}
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 16px;
+      margin-bottom: 7px;
+    }
 
-.subtitle {
-  text-align: center;
-  color: #888;
-  margin-bottom: 25px;
-}
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      background: white;
+    }
 
-.card {
-  background: white;
-  border-radius: 18px;
-  padding: 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 6px 20px rgba(80, 50, 120, 0.08);
-}
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
 
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 7px;
-  color: #555;
-}
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
 
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 16px;
-  margin-bottom: 17px;
-  background: white;
-}
+    .weekday {
+      position: relative;
+    }
 
-textarea {
-  min-height: 90px;
-  resize: vertical;
-}
+    .weekday input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
 
-.weekdays {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
-}
+    .weekday label {
+      margin: 0;
+      padding: 12px 5px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #fff;
+      font-weight: 500;
+      transition: 0.15s;
+    }
 
-.weekday {
-  border: 1px solid #d7c9f5;
-  background: #faf8ff;
-  color: #7656b8;
-  border-radius: 10px;
-  padding: 9px 13px;
-  cursor: pointer;
-  font-size: 14px;
-}
+    .weekday input:checked + label {
+      background: #333;
+      color: white;
+      border-color: #333;
+    }
 
-.weekday.active {
-  background: #7656b8;
-  color: white;
-}
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      margin-top: 20px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-.holiday-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+    #calculateBtn {
+      background: #333;
+      color: white;
+    }
 
-.holiday-row input {
-  margin-bottom: 0;
-}
+    #saveBtn {
+      background: #e8f3ff;
+      color: #1769aa;
+    }
 
-button {
-  border: none;
-  border-radius: 12px;
-  padding: 13px 18px;
-  font-size: 16px;
-  cursor: pointer;
-}
+    button:active {
+      transform: scale(0.99);
+    }
 
-.add-btn {
-  background: #eee8ff;
-  color: #7656b8;
-}
+    #result {
+      margin-top: 22px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f7f7f7;
+      display: none;
+    }
 
-.calculate-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #8061c8, #a184df);
-  color: white;
-  font-weight: 700;
-  margin-top: 5px;
-}
+    #result h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
 
-.save-btn {
-  width: 100%;
-  background: #4d9b73;
-  color: white;
-  font-weight: 700;
-  margin-top: 12px;
-}
+    #schedule {
+      line-height: 1.8;
+      font-size: 15px;
+    }
 
-.save-btn:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      text-align: center;
+    }
 
-.result {
-  display: none;
-}
+    .success {
+      background: #e8f7ed;
+      color: #237a3b;
+    }
 
-.result h2 {
-  color: #7656b8;
-  margin-top: 0;
-}
+    .error {
+      background: #fff0f0;
+      color: #b42318;
+    }
 
-.result-main {
-  background: #f8f4ff;
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 15px;
-}
-
-.result-main strong {
-  color: #7656b8;
-  font-size: 20px;
-}
-
-.schedule {
-  max-height: 350px;
-  overflow-y: auto;
-  background: #fafafa;
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.schedule-item {
-  padding: 8px 4px;
-  border-bottom: 1px solid #eee;
-}
-
-.schedule-item:last-child {
-  border-bottom: none;
-}
-
-.message {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  display: none;
-  text-align: center;
-}
-
-.success {
-  background: #e9f7ef;
-  color: #27734d;
-}
-
-.error {
-  background: #fff0f0;
-  color: #b33a3a;
-}
-
-.small {
-  color: #999;
-  font-size: 13px;
-  margin-top: -10px;
-  margin-bottom: 15px;
-}
-</style>
+    .hint {
+      font-size: 13px;
+      color: #777;
+      margin-top: 5px;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>📚 ClassFlow</h1>
-<div class="subtitle">課程日期計算 & Notion 管理</div>
+  <h1>📚 ClassFlow</h1>
 
+  <label for="studentName">學生姓名</label>
+  <input type="text" id="studentName" placeholder="請輸入學生姓名">
 
-<!-- =========================
-     學生資料
-========================= -->
+  <label for="period">📌 期別</label>
+  <select id="period">
+    <option value="第1期">第1期</option>
+    <option value="第2期">第2期</option>
+    <option value="第3期">第3期</option>
+    <option value="第4期">第4期</option>
+    <option value="第5期">第5期</option>
+  </select>
 
-<div class="card">
+  <label for="grade">🎓 年級</label>
+  <select id="grade">
+    <option value="">請選擇年級</option>
+    <option value="一年級">一年級</option>
+    <option value="二年級">二年級</option>
+    <option value="三年級">三年級</option>
+    <option value="四年級">四年級</option>
+    <option value="五年級">五年級</option>
+    <option value="六年級">六年級</option>
+    <option value="國一">國一</option>
+    <option value="國三">國三</option>
+  </select>
 
-<label>👤 學生姓名</label>
-<input id="studentName" type="text" placeholder="請輸入學生姓名">
+  <label for="book">📚 冊數</label>
+  <select id="book">
+    <option value="">請選擇冊數</option>
+    <option value="A1">A1</option>
+    <option value="A2">A2</option>
+    <option value="A3">A3</option>
+    <option value="B1">B1</option>
+    <option value="Book2">Book2</option>
+    <option value="Book3">Book3</option>
+    <option value="Book4">Book4</option>
+    <option value="Book5">Book5</option>
+    <option value="Book6">Book6</option>
+    <option value="Book7">Book7</option>
+  </select>
 
+  <label for="teacher">👩‍🏫 老師</label>
+  <select id="teacher">
+    <option value="">請選擇老師</option>
+    <option value="政儒老師">政儒老師</option>
+    <option value="叮噹老師">叮噹老師</option>
+    <option value="卓杰老師">卓杰老師</option>
+    <option value="林沖老師">林沖老師</option>
+    <option value="Bonnie 老師">Bonnie 老師</option>
+    <option value="Sandy 老師">Sandy 老師</option>
+    <option value="Frank 老師">Frank 老師</option>
+    <option value="Ariel 老師">Ariel 老師</option>
+    <option value="Flora 老師">Flora 老師</option>
+    <option value="Amanda 老師">Amanda 老師</option>
+  </select>
 
-<label>📌 期別</label>
-<select id="period">
-<option value="">請選擇期別</option>
-<option value="第1期">第1期</option>
-<option value="第2期">第2期</option>
-<option value="第3期">第3期</option>
-<option value="第4期">第4期</option>
-<option value="第5期">第5期</option>
-</select>
+  <label>📆 上課日</label>
 
+  <div class="weekdays">
 
-<label>🎓 年級</label>
-<select id="grade">
-<option value="">請選擇年級</option>
-<option value="一年級">一年級</option>
-<option value="二年級">二年級</option>
-<option value="三年級">三年級</option>
-<option value="四年級">四年級</option>
-<option value="五年級">五年級</option>
-<option value="六年級">六年級</option>
-<option value="國一">國一</option>
-<option value="國三">國三</option>
-</select>
+    <div class="weekday">
+      <input type="checkbox" id="mon" value="星期一">
+      <label for="mon">星期一</label>
+    </div>
 
+    <div class="weekday">
+      <input type="checkbox" id="tue" value="星期二">
+      <label for="tue">星期二</label>
+    </div>
 
-<label>📚 冊數</label>
-<select id="book">
-<option value="">請選擇冊數</option>
-<option value="A1">A1</option>
-<option value="A2">A2</option>
-<option value="A3">A3</option>
-<option value="B1">B1</option>
-<option value="Book2">Book2</option>
-<option value="Book3">Book3</option>
-<option value="Book4">Book4</option>
-<option value="Book5">Book5</option>
-<option value="Book6">Book6</option>
-<option value="Book7">Book7</option>
-</select>
+    <div class="weekday">
+      <input type="checkbox" id="wed" value="星期三">
+      <label for="wed">星期三</label>
+    </div>
 
+    <div class="weekday">
+      <input type="checkbox" id="thu" value="星期四">
+      <label for="thu">星期四</label>
+    </div>
 
-<label>👩‍🏫 老師</label>
-<select id="teacher">
-<option value="">請選擇老師</option>
-<option value="政儒老師">政儒老師</option>
-<option value="叮噹老師">叮噹老師</option>
-<option value="卓杰老師">卓杰老師</option>
-<option value="林沖老師">林沖老師</option>
-<option value="Bonnie 老師">Bonnie 老師</option>
-<option value="Sandy 老師">Sandy 老師</option>
-<option value="Frank 老師">Frank 老師</option>
-<option value="Ariel 老師">Ariel 老師</option>
-<option value="Flora 老師">Flora 老師</option>
-<option value="Amanda 老師">Amanda 老師</option>
-</select>
+    <div class="weekday">
+      <input type="checkbox" id="fri" value="星期五">
+      <label for="fri">星期五</label>
+    </div>
 
+    <div class="weekday">
+      <input type="checkbox" id="sat" value="星期六">
+      <label for="sat">星期六</label>
+    </div>
 
-<label>📝 備註</label>
-<textarea id="note" placeholder="例如：教材已收到、特殊安排等"></textarea>
+  </div>
 
-</div>
+  <div class="hint">
+    可複選，例如星期一＋星期三＋星期五
+  </div>
 
+  <label for="startDate">📅 開始日期</label>
+  <input type="date" id="startDate">
 
-<!-- =========================
-     課程設定
-========================= -->
+  <label for="lessonCount">🔢 總堂數</label>
+  <input type="number" id="lessonCount" value="24" min="1">
 
-<div class="card">
+  <label for="customHolidays">🚫 自訂假日</label>
+  <input
+    type="text"
+    id="customHolidays"
+    placeholder="例如：2027-06-01, 2027-06-15"
+  >
 
-<label>📅 開始日期</label>
-<input id="startDate" type="date">
+  <label for="note">📝 備註</label>
+  <textarea
+    id="note"
+    placeholder="有需要可以輸入備註"
+  ></textarea>
 
+  <button id="calculateBtn">📅 計算課程日期</button>
 
-<label>📆 上課日</label>
+  <div id="result">
+    <h2>📋 課程結果</h2>
 
-<div class="weekdays">
+    <div>
+      <strong>開始日期：</strong>
+      <span id="resultStart"></span>
+    </div>
 
-<button class="weekday" data-day="1">星期一</button>
-<button class="weekday" data-day="2">星期二</button>
-<button class="weekday" data-day="3">星期三</button>
-<button class="weekday" data-day="4">星期四</button>
-<button class="weekday" data-day="5">星期五</button>
-<button class="weekday" data-day="6">星期六</button>
-<button class="weekday" data-day="0">星期日</button>
+    <div>
+      <strong>最後日期：</strong>
+      <span id="resultEnd"></span>
+    </div>
 
-</div>
+    <div>
+      <strong>總堂數：</strong>
+      <span id="resultCount"></span>
+    </div>
 
+    <hr>
 
-<label>
-<input id="skipNational"
-       type="checkbox"
-       checked
-       style="width:auto;">
-🇹🇼 跳過國定假日
-</label>
+    <div id="schedule"></div>
 
+    <button id="saveBtn">☁️ 儲存到 Notion</button>
 
-<label>➕ 自訂休假日</label>
-
-<div class="holiday-row">
-
-<input id="customHoliday"
-       type="date">
-
-<button class="add-btn"
-        onclick="addHoliday()">
-新增
-</button>
-
-</div>
-
-<div id="holidayList"
-     class="small">
-</div>
-
-
-<label>🔢 總堂數</label>
-
-<input id="lessonCount"
-       type="number"
-       value="24"
-       min="1">
-
-
-<button class="calculate-btn"
-        onclick="calculate()">
-🧮 開始計算
-</button>
-
-</div>
-
-
-<!-- =========================
-     結果
-========================= -->
-
-<div class="card result"
-     id="result">
-
-<h2>📋 課程結果</h2>
-
-
-<div class="result-main">
-
-<div>
-🏁 最後日期：
-<strong id="finalDate"></strong>
-</div>
-
-<br>
-
-<div>
-🔢 總堂數：
-<strong id="resultLessons"></strong>
-</div>
-
-<br>
-
-<div>
-⏭️ 跳過天數：
-<strong id="skippedDays"></strong>
-</div>
-
-</div>
-
-
-<h3>📆 完整上課日期</h3>
-
-<div id="schedule"
-     class="schedule">
-</div>
-
-
-<button class="save-btn"
-        id="saveBtn"
-        onclick="saveToNotion()">
-☁️ 儲存到 Notion
-</button>
-
-
-<div id="message"
-     class="message">
-</div>
-
-</div>
+    <div id="message" class="message"></div>
+  </div>
 
 </div>
 
 
 <script>
 
-/* ==================================================
-   ⭐⭐⭐ 重要 ⭐⭐⭐
+  /*
+   * ==========================================
+   * ⭐⭐⭐ 只需要確認這裡
+   * ==========================================
+   *
+   * 把這裡換成你剛剛成功顯示
+   * 「ClassFlow API OK」
+   * 的 Web App URL。
+   */
 
-   把你的 Apps Script Web App URL
-   貼在下面雙引號裡面
+  const NOTION_API_URL =
+    "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
 
-   例如：
-   const NOTION_API_URL =
-   "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
-================================================== */
 
-const NOTION_API_URL =
-  "請把你的 Web App URL 貼在這裡";
+  /*
+   * ==========================================
+   * 2026 國定假日
+   * ==========================================
+   */
 
+  const holidays2026 = [
 
-/* ==================================================
-   🇹🇼 國定假日
-   2026 + 2027
-================================================== */
+    "2026-01-01",
 
-const nationalHolidays = {
+    "2026-02-14",
+    "2026-02-15",
+    "2026-02-16",
+    "2026-02-17",
+    "2026-02-18",
+    "2026-02-19",
+    "2026-02-20",
+    "2026-02-21",
+    "2026-02-22",
 
+    "2026-02-27",
+    "2026-02-28",
 
-/* ==========================
-   2026
-========================== */
+    "2026-04-03",
+    "2026-04-04",
+    "2026-04-05",
+    "2026-04-06",
 
-"2026-01-01": "元旦",
+    "2026-05-01",
 
-/* 春節 */
-"2026-02-14": "春節連假",
-"2026-02-15": "春節連假",
-"2026-02-16": "除夕",
-"2026-02-17": "春節",
-"2026-02-18": "春節",
-"2026-02-19": "春節",
-"2026-02-20": "春節補假",
-"2026-02-21": "春節連假",
-"2026-02-22": "春節連假",
+    "2026-06-19",
 
-/* 228 */
-"2026-02-27": "和平紀念日補假",
-"2026-02-28": "和平紀念日",
+    "2026-09-25",
+    "2026-09-28",
 
-/* 兒童節、清明節 */
-"2026-04-03": "兒童節補假",
-"2026-04-04": "兒童節",
-"2026-04-05": "清明節",
-"2026-04-06": "清明節補假",
+    "2026-10-09",
+    "2026-10-10",
 
-/* 勞動節 */
-"2026-05-01": "勞動節",
+    "2026-10-25",
+    "2026-10-26",
 
-/* 端午節 */
-"2026-06-19": "端午節",
+    "2026-12-25"
+  ];
 
-/* 中秋節、教師節 */
-"2026-09-25": "中秋節",
-"2026-09-28": "教師節",
 
-/* 國慶日 */
-"2026-10-09": "國慶日補假",
-"2026-10-10": "國慶日",
+  /*
+   * ==========================================
+   * 2027 國定假日
+   * ==========================================
+   */
 
-/* 光復紀念日 */
-"2026-10-25": "臺灣光復暨金門古寧頭大捷紀念日",
-"2026-10-26": "光復紀念日補假",
+  const holidays2027 = [
 
-/* 行憲紀念日 */
-"2026-12-25": "行憲紀念日",
+    "2027-01-01",
+    "2027-01-02",
+    "2027-01-03",
 
+    "2027-02-04",
+    "2027-02-05",
+    "2027-02-06",
+    "2027-02-07",
+    "2027-02-08",
+    "2027-02-09",
+    "2027-02-10",
 
-/* ==========================
-   2027
-========================== */
+    "2027-02-27",
+    "2027-02-28",
+    "2027-03-01",
 
-"2027-01-01": "元旦",
+    "2027-04-03",
+    "2027-04-04",
+    "2027-04-05",
+    "2027-04-06",
 
-/* 春節 2/4～2/10 */
-"2027-02-04": "春節連假",
-"2027-02-05": "除夕",
-"2027-02-06": "春節",
-"2027-02-07": "春節",
-"2027-02-08": "春節",
-"2027-02-09": "春節補假",
-"2027-02-10": "春節補假",
+    "2027-04-30",
+    "2027-05-01",
+    "2027-05-02",
 
-/* 和平紀念日 */
-"2027-02-27": "和平紀念日連假",
-"2027-02-28": "和平紀念日",
-"2027-03-01": "和平紀念日補假",
+    "2027-10-09",
+    "2027-10-10",
+    "2027-10-11",
 
-/* 兒童節、清明節 */
-"2027-04-03": "兒童節及清明節連假",
-"2027-04-04": "兒童節",
-"2027-04-05": "清明節",
-"2027-04-06": "兒童節補假",
+    "2027-10-23",
+    "2027-10-24",
+    "2027-10-25",
 
-/* 勞動節 */
-"2027-04-30": "勞動節補假",
-"2027-05-01": "勞動節",
+    "2027-12-24",
+    "2027-12-25",
+    "2027-12-26",
 
-/* 端午節 */
-"2027-06-09": "端午節",
+    "2027-12-31"
+  ];
 
-/* 中秋節 */
-"2027-09-15": "中秋節",
 
-/* 教師節 */
-"2027-09-28": "教師節",
+  const holidays = new Set([
+    ...holidays2026,
+    ...holidays2027
+  ]);
 
-/* 國慶日 */
-"2027-10-09": "國慶日連假",
-"2027-10-10": "國慶日",
-"2027-10-11": "國慶日補假",
 
-/* 光復紀念日 */
-"2027-10-23": "光復紀念日連假",
-"2027-10-24": "光復紀念日連假",
-"2027-10-25": "臺灣光復暨金門古寧頭大捷紀念日",
+  let calculatedData = null;
 
-/* 行憲紀念日 */
-"2027-12-24": "行憲紀念日補假",
-"2027-12-25": "行憲紀念日",
-"2027-12-26": "行憲紀念日連假",
 
-/* 2028 元旦補假 */
-"2027-12-31": "2028元旦補假"
+  /*
+   * ==========================================
+   * 工具：日期轉 YYYY-MM-DD
+   * ==========================================
+   */
 
-};
+  function formatDate(date) {
 
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
-/* ==================================================
-   自訂假日
-================================================== */
+    return `${year}-${month}-${day}`;
+  }
 
-let customHolidays = [];
 
+  /*
+   * ==========================================
+   * 工具：星期
+   * ==========================================
+   */
 
-/* ==================================================
-   選擇上課日
-================================================== */
+  function getWeekdayName(date) {
 
-let selectedDays = [];
+    const names = [
+      "星期日",
+      "星期一",
+      "星期二",
+      "星期三",
+      "星期四",
+      "星期五",
+      "星期六"
+    ];
 
+    return names[date.getDay()];
+  }
 
-document.querySelectorAll(".weekday")
-.forEach(button => {
 
-button.addEventListener("click", () => {
+  /*
+   * ==========================================
+   * 取得自訂假日
+   * ==========================================
+   */
 
-const day =
-Number(button.dataset.day);
+  function getCustomHolidays() {
 
+    const text =
+      document.getElementById("customHolidays").value.trim();
 
-button.classList.toggle("active");
+    if (!text) {
+      return new Set();
+    }
 
+    const dates = text
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean);
 
-if (selectedDays.includes(day)) {
+    return new Set(dates);
+  }
 
-selectedDays =
-selectedDays.filter(d => d !== day);
 
-} else {
+  /*
+   * ==========================================
+   * 判斷是否為假日
+   * ==========================================
+   */
 
-selectedDays.push(day);
+  function isHoliday(date, customHolidays) {
 
-}
+    const dateString = formatDate(date);
 
-});
+    return (
+      holidays.has(dateString) ||
+      customHolidays.has(dateString)
+    );
+  }
 
-});
 
+  /*
+   * ==========================================
+   * 取得選擇的上課日
+   * ==========================================
+   */
 
-/* ==================================================
-   新增自訂假日
-================================================== */
+  function getSelectedWeekdays() {
 
-function addHoliday() {
+    const checkboxes =
+      document.querySelectorAll(
+        '.weekday input[type="checkbox"]:checked'
+      );
 
-const input =
-document.getElementById("customHoliday");
+    return Array.from(checkboxes)
+      .map(checkbox => checkbox.value);
+  }
 
-const date =
-input.value;
 
-
-if (!date) {
-
-alert("請先選擇日期");
-
-return;
-
-}
-
-
-if (!customHolidays.includes(date)) {
-
-customHolidays.push(date);
-
-}
-
-
-input.value = "";
-
-renderHolidayList();
-
-}
-
-
-/* ==================================================
-   顯示自訂假日
-================================================== */
-
-function renderHolidayList() {
-
-const list =
-document.getElementById("holidayList");
-
-
-if (customHolidays.length === 0) {
-
-list.innerHTML = "";
-
-return;
-
-}
-
-
-list.innerHTML =
-"自訂假日：" +
-customHolidays.join("、");
-
-}
-
-
-/* ==================================================
-   日期格式
-================================================== */
-
-fu
+  /*
+   * ==========================================
+   * 計算課程日期
+   * =====================
