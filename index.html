@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ClassFlow｜課程日期計算器</title>
+<title>ClassFlow 課程管理</title>
 
 <style>
 * {
@@ -13,907 +13,640 @@
 
 body {
   margin: 0;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Noto Sans TC",
-    "Microsoft JhengHei",
-    sans-serif;
-  background: #f6f7fb;
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+               "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(135deg, #f5efff, #eee7ff);
   color: #333;
 }
 
-header {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 28px 20px;
-  text-align: center;
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 25px 16px 50px;
 }
 
-.logo {
-  font-size: 28px;
-  font-weight: 700;
+h1 {
+  text-align: center;
+  color: #7656b8;
+  margin-bottom: 6px;
 }
 
 .subtitle {
-  margin-top: 6px;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-main {
-  max-width: 650px;
-  margin: 0 auto;
-  padding: 20px 15px 50px;
+  text-align: center;
+  color: #888;
+  margin-bottom: 25px;
 }
 
 .card {
   background: white;
   border-radius: 18px;
-  padding: 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-}
-
-h2 {
-  margin: 0 0 16px;
-  font-size: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 20px rgba(80, 50, 120, 0.08);
 }
 
 label {
   display: block;
-  margin-bottom: 8px;
   font-weight: 600;
+  margin-bottom: 7px;
+  color: #555;
 }
 
-input[type="date"],
-input[type="number"] {
+input,
+select,
+textarea {
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 10px;
   font-size: 16px;
+  margin-bottom: 17px;
   background: white;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
 .weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
-.day-btn {
-  border: 1px solid #ddd;
-  background: white;
+.weekday {
+  border: 1px solid #d7c9f5;
+  background: #faf8ff;
+  color: #7656b8;
   border-radius: 10px;
-  padding: 11px 3px;
+  padding: 9px 13px;
+  cursor: pointer;
   font-size: 14px;
+}
+
+.weekday.active {
+  background: #7656b8;
+  color: white;
+}
+
+.holiday-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.holiday-row input {
+  margin-bottom: 0;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 16px;
   cursor: pointer;
 }
 
-.day-btn.active {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 15px;
-}
-
-.checkbox-row input {
-  width: 18px;
-  height: 18px;
-}
-
-.add-row {
-  display: flex;
-  gap: 8px;
-}
-
-.add-row input {
-  flex: 1;
-}
-
-.small-btn {
-  border: none;
-  background: #667eea;
-  color: white;
-  padding: 0 15px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-
-.holiday-list {
-  margin-top: 12px;
-}
-
-.holiday-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f7f7fb;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 7px;
-  font-size: 14px;
-}
-
-.delete-btn {
-  border: none;
-  background: transparent;
-  color: #e05252;
-  font-size: 18px;
+.add-btn {
+  background: #eee8ff;
+  color: #7656b8;
 }
 
 .calculate-btn {
   width: 100%;
-  border: none;
-  border-radius: 14px;
-  padding: 16px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #8061c8, #a184df);
   color: white;
-  font-size: 17px;
   font-weight: 700;
-  cursor: pointer;
+  margin-top: 5px;
+}
+
+.save-btn {
+  width: 100%;
+  background: #4d9b73;
+  color: white;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.save-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
 }
 
 .result {
   display: none;
 }
 
-.result.show {
-  display: block;
+.result h2 {
+  color: #7656b8;
+  margin-top: 0;
 }
 
-.final-date {
-  text-align: center;
-  background: #f0efff;
-  border-radius: 15px;
+.result-main {
+  background: #f8f4ff;
+  border-radius: 14px;
   padding: 18px;
   margin-bottom: 15px;
 }
 
-.final-date .title {
-  font-size: 13px;
-  color: #666;
-}
-
-.final-date .date {
-  font-size: 27px;
-  font-weight: 700;
-  color: #667eea;
-  margin-top: 5px;
-}
-
-.summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.summary-box {
-  background: #f7f7fb;
-  border-radius: 12px;
-  padding: 14px;
-  text-align: center;
-}
-
-.summary-box .number {
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.summary-box .text {
-  font-size: 12px;
-  color: #777;
+.result-main strong {
+  color: #7656b8;
+  font-size: 20px;
 }
 
 .schedule {
-  margin-top: 10px;
+  max-height: 350px;
+  overflow-y: auto;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 12px;
 }
 
 .schedule-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 0;
+  padding: 8px 4px;
   border-bottom: 1px solid #eee;
 }
 
-.schedule-date {
-  min-width: 90px;
-  font-weight: 600;
+.schedule-item:last-child {
+  border-bottom: none;
 }
 
-.schedule-status {
-  font-size: 14px;
-}
-
-.schedule-item.normal .schedule-status {
-  color: #555;
-}
-
-.schedule-item.holiday {
-  color: #d47b00;
-  background: #fffaf0;
-}
-
-.schedule-item.custom {
-  color: #d9534f;
-  background: #fff5f5;
-}
-
-.warning {
-  color: #d9534f;
-  background: #fff5f5;
-  border-radius: 10px;
+.message {
+  margin-top: 12px;
   padding: 12px;
-  margin-bottom: 15px;
+  border-radius: 10px;
   display: none;
+  text-align: center;
 }
 
-@media (max-width: 420px) {
-  .weekdays {
-    gap: 4px;
-  }
+.success {
+  background: #e9f7ef;
+  color: #27734d;
+}
 
-  .day-btn {
-    font-size: 13px;
-    padding: 10px 2px;
-  }
+.error {
+  background: #fff0f0;
+  color: #b33a3a;
+}
+
+.small {
+  color: #999;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">📚 ClassFlow</div>
-  <div class="subtitle">課程日期計算器</div>
-</header>
+<div class="container">
 
-<main>
+<h1>📚 ClassFlow</h1>
+<div class="subtitle">課程日期計算 & Notion 管理</div>
 
-  <!-- 開始日期 -->
-  <div class="card">
-    <h2>📅 課程開始日期</h2>
 
-    <label for="startDate">開始上課日期</label>
-    <input type="date" id="startDate">
-  </div>
+<!-- =========================
+     學生資料
+========================= -->
 
-  <!-- 星期 -->
-  <div class="card">
-    <h2>📆 每週上課日</h2>
+<div class="card">
 
-    <div class="weekdays">
-      <button class="day-btn" data-day="1">一</button>
-      <button class="day-btn" data-day="2">二</button>
-      <button class="day-btn" data-day="3">三</button>
-      <button class="day-btn" data-day="4">四</button>
-      <button class="day-btn" data-day="5">五</button>
-      <button class="day-btn" data-day="6">六</button>
-      <button class="day-btn" data-day="0">日</button>
-    </div>
-  </div>
+<label>👤 學生姓名</label>
+<input id="studentName" type="text" placeholder="請輸入學生姓名">
 
-  <!-- 堂數 -->
-  <div class="card">
-    <h2>🔢 課程堂數</h2>
 
-    <label for="lessonCount">總共上幾堂</label>
-    <input
-      type="number"
-      id="lessonCount"
-      min="1"
-      value="16"
-    >
-  </div>
+<label>📌 期別</label>
+<select id="period">
+<option value="">請選擇期別</option>
+<option value="第1期">第1期</option>
+<option value="第2期">第2期</option>
+<option value="第3期">第3期</option>
+<option value="第4期">第4期</option>
+<option value="第5期">第5期</option>
+</select>
 
-  <!-- 國定假日 -->
-  <div class="card">
 
-    <h2>🇹🇼 國定假日</h2>
+<label>🎓 年級</label>
+<select id="grade">
+<option value="">請選擇年級</option>
+<option value="一年級">一年級</option>
+<option value="二年級">二年級</option>
+<option value="三年級">三年級</option>
+<option value="四年級">四年級</option>
+<option value="五年級">五年級</option>
+<option value="六年級">六年級</option>
+<option value="國一">國一</option>
+<option value="國三">國三</option>
+</select>
 
-    <div class="checkbox-row">
-      <input type="checkbox" id="skipNational" checked>
-      <label for="skipNational" style="margin:0;">
-        自動跳過國定假日
-      </label>
-    </div>
 
-    <div style="font-size:13px;color:#777;line-height:1.6;">
-      依照政府行政機關辦公日曆自動跳過放假日。
-    </div>
+<label>📚 冊數</label>
+<select id="book">
+<option value="">請選擇冊數</option>
+<option value="A1">A1</option>
+<option value="A2">A2</option>
+<option value="A3">A3</option>
+<option value="B1">B1</option>
+<option value="Book2">Book2</option>
+<option value="Book3">Book3</option>
+<option value="Book4">Book4</option>
+<option value="Book5">Book5</option>
+<option value="Book6">Book6</option>
+<option value="Book7">Book7</option>
+</select>
 
-  </div>
 
-  <!-- 自訂停課 -->
-  <div class="card">
+<label>👩‍🏫 老師</label>
+<select id="teacher">
+<option value="">請選擇老師</option>
+<option value="政儒老師">政儒老師</option>
+<option value="叮噹老師">叮噹老師</option>
+<option value="卓杰老師">卓杰老師</option>
+<option value="林沖老師">林沖老師</option>
+<option value="Bonnie 老師">Bonnie 老師</option>
+<option value="Sandy 老師">Sandy 老師</option>
+<option value="Frank 老師">Frank 老師</option>
+<option value="Ariel 老師">Ariel 老師</option>
+<option value="Flora 老師">Flora 老師</option>
+<option value="Amanda 老師">Amanda 老師</option>
+</select>
 
-    <h2>🚫 自訂停課日期</h2>
 
-    <div class="add-row">
+<label>📝 備註</label>
+<textarea id="note" placeholder="例如：教材已收到、特殊安排等"></textarea>
 
-      <input type="date" id="customDate">
+</div>
 
-      <button
-        class="small-btn"
-        id="addCustomBtn"
-      >
-        ＋ 新增
-      </button>
 
-    </div>
+<!-- =========================
+     課程設定
+========================= -->
 
-    <div id="customList" class="holiday-list"></div>
+<div class="card">
 
-  </div>
+<label>📅 開始日期</label>
+<input id="startDate" type="date">
 
-  <!-- 開始計算 -->
-  <div class="card">
 
-    <div id="warning" class="warning"></div>
+<label>📆 上課日</label>
 
-    <button
-      class="calculate-btn"
-      id="calculateBtn"
-    >
-      ✨ 開始計算
-    </button>
+<div class="weekdays">
 
-  </div>
+<button class="weekday" data-day="1">星期一</button>
+<button class="weekday" data-day="2">星期二</button>
+<button class="weekday" data-day="3">星期三</button>
+<button class="weekday" data-day="4">星期四</button>
+<button class="weekday" data-day="5">星期五</button>
+<button class="weekday" data-day="6">星期六</button>
+<button class="weekday" data-day="0">星期日</button>
 
-  <!-- 結果 -->
-  <div class="card result" id="result">
+</div>
 
-    <h2>📋 課程結果</h2>
 
-    <div class="final-date">
+<label>
+<input id="skipNational"
+       type="checkbox"
+       checked
+       style="width:auto;">
+🇹🇼 跳過國定假日
+</label>
 
-      <div class="title">
-        最後一堂課
-      </div>
 
-      <div
-        class="date"
-        id="finalDate"
-      >
-      </div>
+<label>➕ 自訂休假日</label>
 
-    </div>
+<div class="holiday-row">
 
-    <div class="summary">
+<input id="customHoliday"
+       type="date">
 
-      <div class="summary-box">
+<button class="add-btn"
+        onclick="addHoliday()">
+新增
+</button>
 
-        <div
-          class="number"
-          id="totalLessons"
-        >
-          0
-        </div>
+</div>
 
-        <div class="text">
-          上課堂數
-        </div>
+<div id="holidayList"
+     class="small">
+</div>
 
-      </div>
 
-      <div class="summary-box">
+<label>🔢 總堂數</label>
 
-        <div
-          class="number"
-          id="skippedDays"
-        >
-          0
-        </div>
+<input id="lessonCount"
+       type="number"
+       value="24"
+       min="1">
 
-        <div class="text">
-          跳過日期
-        </div>
 
-      </div>
+<button class="calculate-btn"
+        onclick="calculate()">
+🧮 開始計算
+</button>
 
-    </div>
+</div>
 
-    <h2 style="margin-top:20px;">
-      📝 完整課表
-    </h2>
 
-    <div
-      class="schedule"
-      id="schedule"
-    >
-    </div>
+<!-- =========================
+     結果
+========================= -->
 
-  </div>
+<div class="card result"
+     id="result">
 
-</main>
+<h2>📋 課程結果</h2>
+
+
+<div class="result-main">
+
+<div>
+🏁 最後日期：
+<strong id="finalDate"></strong>
+</div>
+
+<br>
+
+<div>
+🔢 總堂數：
+<strong id="resultLessons"></strong>
+</div>
+
+<br>
+
+<div>
+⏭️ 跳過天數：
+<strong id="skippedDays"></strong>
+</div>
+
+</div>
+
+
+<h3>📆 完整上課日期</h3>
+
+<div id="schedule"
+     class="schedule">
+</div>
+
+
+<button class="save-btn"
+        id="saveBtn"
+        onclick="saveToNotion()">
+☁️ 儲存到 Notion
+</button>
+
+
+<div id="message"
+     class="message">
+</div>
+
+</div>
+
+</div>
+
 
 <script>
 
-/* =========================
-   選擇星期
-========================= */
+/* ==================================================
+   ⭐⭐⭐ 重要 ⭐⭐⭐
 
-const selectedDays = new Set();
+   把你的 Apps Script Web App URL
+   貼在下面雙引號裡面
 
-document.querySelectorAll(".day-btn").forEach(button => {
+   例如：
+   const NOTION_API_URL =
+   "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
+================================================== */
 
-  button.addEventListener("click", () => {
+const NOTION_API_URL =
+  "請把你的 Web App URL 貼在這裡";
 
-    const day = Number(button.dataset.day);
 
-    if (selectedDays.has(day)) {
+/* ==================================================
+   🇹🇼 國定假日
+   2026 + 2027
+================================================== */
 
-      selectedDays.delete(day);
-      button.classList.remove("active");
+const nationalHolidays = {
 
-    } else {
 
-      selectedDays.add(day);
-      button.classList.add("active");
+/* ==========================
+   2026
+========================== */
 
-    }
+"2026-01-01": "元旦",
 
-  });
+/* 春節 */
+"2026-02-14": "春節連假",
+"2026-02-15": "春節連假",
+"2026-02-16": "除夕",
+"2026-02-17": "春節",
+"2026-02-18": "春節",
+"2026-02-19": "春節",
+"2026-02-20": "春節補假",
+"2026-02-21": "春節連假",
+"2026-02-22": "春節連假",
+
+/* 228 */
+"2026-02-27": "和平紀念日補假",
+"2026-02-28": "和平紀念日",
+
+/* 兒童節、清明節 */
+"2026-04-03": "兒童節補假",
+"2026-04-04": "兒童節",
+"2026-04-05": "清明節",
+"2026-04-06": "清明節補假",
+
+/* 勞動節 */
+"2026-05-01": "勞動節",
+
+/* 端午節 */
+"2026-06-19": "端午節",
+
+/* 中秋節、教師節 */
+"2026-09-25": "中秋節",
+"2026-09-28": "教師節",
+
+/* 國慶日 */
+"2026-10-09": "國慶日補假",
+"2026-10-10": "國慶日",
+
+/* 光復紀念日 */
+"2026-10-25": "臺灣光復暨金門古寧頭大捷紀念日",
+"2026-10-26": "光復紀念日補假",
+
+/* 行憲紀念日 */
+"2026-12-25": "行憲紀念日",
+
+
+/* ==========================
+   2027
+========================== */
+
+"2027-01-01": "元旦",
+
+/* 春節 2/4～2/10 */
+"2027-02-04": "春節連假",
+"2027-02-05": "除夕",
+"2027-02-06": "春節",
+"2027-02-07": "春節",
+"2027-02-08": "春節",
+"2027-02-09": "春節補假",
+"2027-02-10": "春節補假",
+
+/* 和平紀念日 */
+"2027-02-27": "和平紀念日連假",
+"2027-02-28": "和平紀念日",
+"2027-03-01": "和平紀念日補假",
+
+/* 兒童節、清明節 */
+"2027-04-03": "兒童節及清明節連假",
+"2027-04-04": "兒童節",
+"2027-04-05": "清明節",
+"2027-04-06": "兒童節補假",
+
+/* 勞動節 */
+"2027-04-30": "勞動節補假",
+"2027-05-01": "勞動節",
+
+/* 端午節 */
+"2027-06-09": "端午節",
+
+/* 中秋節 */
+"2027-09-15": "中秋節",
+
+/* 教師節 */
+"2027-09-28": "教師節",
+
+/* 國慶日 */
+"2027-10-09": "國慶日連假",
+"2027-10-10": "國慶日",
+"2027-10-11": "國慶日補假",
+
+/* 光復紀念日 */
+"2027-10-23": "光復紀念日連假",
+"2027-10-24": "光復紀念日連假",
+"2027-10-25": "臺灣光復暨金門古寧頭大捷紀念日",
+
+/* 行憲紀念日 */
+"2027-12-24": "行憲紀念日補假",
+"2027-12-25": "行憲紀念日",
+"2027-12-26": "行憲紀念日連假",
+
+/* 2028 元旦補假 */
+"2027-12-31": "2028元旦補假"
+
+};
+
+
+/* ==================================================
+   自訂假日
+================================================== */
+
+let customHolidays = [];
+
+
+/* ==================================================
+   選擇上課日
+================================================== */
+
+let selectedDays = [];
+
+
+document.querySelectorAll(".weekday")
+.forEach(button => {
+
+button.addEventListener("click", () => {
+
+const day =
+Number(button.dataset.day);
+
+
+button.classList.toggle("active");
+
+
+if (selectedDays.includes(day)) {
+
+selectedDays =
+selectedDays.filter(d => d !== day);
+
+} else {
+
+selectedDays.push(day);
+
+}
+
+});
 
 });
 
 
-/* =========================
-   2026 政府放假日期
-   依 DGPA 官方辦公日曆
-========================= */
+/* ==================================================
+   新增自訂假日
+================================================== */
 
-const nationalHolidays = {
+function addHoliday() {
 
-  "2026-01-01": "元旦",
+const input =
+document.getElementById("customHoliday");
 
-  "2026-02-14": "春節",
-  "2026-02-15": "春節",
-  "2026-02-16": "春節",
-  "2026-02-17": "春節",
-  "2026-02-18": "春節",
-  "2026-02-19": "春節",
-  "2026-02-20": "春節補假",
-  "2026-02-21": "春節",
-  "2026-02-22": "春節",
-
-  "2026-02-27": "和平紀念日補假",
-  "2026-02-28": "和平紀念日",
-  "2026-03-01": "和平紀念日連假",
-
-  "2026-04-03": "兒童節補假",
-  "2026-04-04": "兒童節",
-  "2026-04-05": "清明節",
-  "2026-04-06": "清明節補假",
-
-  "2026-05-01": "勞動節",
-  "2026-05-02": "勞動節連假",
-  "2026-05-03": "勞動節連假",
-
-  "2026-06-19": "端午節",
-  "2026-06-20": "端午節連假",
-  "2026-06-21": "端午節連假",
-
-  "2026-09-25": "中秋節",
-  "2026-09-26": "中秋節連假",
-  "2026-09-27": "中秋節連假",
-  "2026-09-28": "教師節",
-
-  "2026-10-09": "國慶日補假",
-  "2026-10-10": "國慶日",
-  "2026-10-11": "國慶日連假",
-
-  "2026-10-24": "光復暨古寧頭大捷紀念日連假",
-  "2026-10-25": "光復暨古寧頭大捷紀念日",
-  "2026-10-26": "光復暨古寧頭大捷紀念日補假",
-
-  "2026-12-25": "行憲紀念日",
-  "2026-12-26": "行憲紀念日連假",
-  "2026-12-27": "行憲紀念日連假"
-};
+const date =
+input.value;
 
 
-/* =========================
-   自訂停課日期
-========================= */
+if (!date) {
 
-const customHolidays = new Set();
+alert("請先選擇日期");
 
-
-function renderCustomHolidays() {
-
-  const list = document.getElementById("customList");
-
-  list.innerHTML = "";
-
-  if (customHolidays.size === 0) {
-    return;
-  }
-
-  const dates = Array.from(customHolidays).sort();
-
-  dates.forEach(date => {
-
-    const item = document.createElement("div");
-
-    item.className = "holiday-item";
-
-    item.innerHTML = `
-      <span>🚫 ${date}</span>
-      <button
-        class="delete-btn"
-        onclick="removeCustomHoliday('${date}')"
-      >
-        ×
-      </button>
-    `;
-
-    list.appendChild(item);
-
-  });
+return;
 
 }
 
 
-function removeCustomHoliday(date) {
+if (!customHolidays.includes(date)) {
 
-  customHolidays.delete(date);
-
-  renderCustomHolidays();
+customHolidays.push(date);
 
 }
 
 
-document
-  .getElementById("addCustomBtn")
-  .addEventListener("click", () => {
+input.value = "";
 
-    const input = document.getElementById("customDate");
+renderHolidayList();
 
-    const date = input.value;
-
-    if (!date) {
-      return;
-    }
-
-    customHolidays.add(date);
-
-    input.value = "";
-
-    renderCustomHolidays();
-
-  });
+}
 
 
-/* =========================
+/* ==================================================
+   顯示自訂假日
+================================================== */
+
+function renderHolidayList() {
+
+const list =
+document.getElementById("holidayList");
+
+
+if (customHolidays.length === 0) {
+
+list.innerHTML = "";
+
+return;
+
+}
+
+
+list.innerHTML =
+"自訂假日：" +
+customHolidays.join("、");
+
+}
+
+
+/* ==================================================
    日期格式
-========================= */
+================================================== */
 
-function formatDate(date) {
-
-  const y = date.getFullYear();
-
-  const m = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
-
-  const d = String(
-    date.getDate()
-  ).padStart(2, "0");
-
-  return `${y}-${m}-${d}`;
-
-}
-
-
-function formatChineseDate(date) {
-
-  const weekdays = [
-    "日",
-    "一",
-    "二",
-    "三",
-    "四",
-    "五",
-    "六"
-  ];
-
-  return `
-    ${date.getFullYear()}/
-    ${String(date.getMonth()+1).padStart(2,"0")}/
-    ${String(date.getDate()).padStart(2,"0")}
-    （${weekdays[date.getDay()]}）
-  `;
-
-}
-
-
-/* =========================
-   計算課程
-========================= */
-
-function calculateCourse() {
-
-  const warning = document.getElementById("warning");
-
-  warning.style.display = "none";
-
-  const startValue =
-    document.getElementById("startDate").value;
-
-  const lessonCount =
-    Number(
-      document.getElementById("lessonCount").value
-    );
-
-  const skipNational =
-    document.getElementById("skipNational").checked;
-
-
-  /* 檢查 */
-
-  if (!startValue) {
-
-    warning.textContent =
-      "請先選擇課程開始日期。";
-
-    warning.style.display = "block";
-
-    return;
-
-  }
-
-
-  if (selectedDays.size === 0) {
-
-    warning.textContent =
-      "請至少選擇一個上課日。";
-
-    warning.style.display = "block";
-
-    return;
-
-  }
-
-
-  if (!lessonCount || lessonCount < 1) {
-
-    warning.textContent =
-      "請輸入正確的課程堂數。";
-
-    warning.style.display = "block";
-
-    return;
-
-  }
-
-
-  /* 日期 */
-
-  let currentDate =
-    new Date(startValue + "T00:00:00");
-
-  let count = 0;
-
-  let skipped = 0;
-
-  const schedule = [];
-
-
-  /*
-    防止設定錯誤導致無限迴圈
-  */
-
-  let safety = 0;
-
-
-  while (
-    count < lessonCount &&
-    safety < 5000
-  ) {
-
-    safety++;
-
-    const dateString =
-      formatDate(currentDate);
-
-    const weekDay =
-      currentDate.getDay();
-
-    const isClassDay =
-      selectedDays.has(weekDay);
-
-    const nationalHolidayName =
-      nationalHolidays[dateString];
-
-    const isNationalHoliday =
-      Boolean(nationalHolidayName);
-
-    const isCustomHoliday =
-      customHolidays.has(dateString);
-
-
-    if (isClassDay) {
-
-      /* 國定假日 */
-
-      if (
-        skipNational &&
-        isNationalHoliday
-      ) {
-
-        skipped++;
-
-        schedule.push({
-
-          date: formatChineseDate(currentDate),
-
-          status:
-            `🇹🇼 ${nationalHolidayName}`,
-
-          type: "holiday"
-
-        });
-
-      }
-
-      /* 自訂停課 */
-
-      else if (isCustomHoliday) {
-
-        skipped++;
-
-        schedule.push({
-
-          date: formatChineseDate(currentDate),
-
-          status: "🚫 自訂停課",
-
-          type: "custom"
-
-        });
-
-      }
-
-      /* 正常上課 */
-
-      else {
-
-        count++;
-
-        schedule.push({
-
-          date: formatChineseDate(currentDate),
-
-          status:
-            `第 ${count} 堂`,
-
-          type: "normal"
-
-        });
-
-      }
-
-    }
-
-
-    /* 下一天 */
-
-    if (count < lessonCount) {
-
-      currentDate.setDate(
-        currentDate.getDate() + 1
-      );
-
-    }
-
-  }
-
-
-  /* =========================
-     顯示結果
-  ========================= */
-
-  const result =
-    document.getElementById("result");
-
-  result.classList.add("show");
-
-
-  document.getElementById("finalDate")
-    .textContent =
-      formatChineseDate(currentDate);
-
-
-  document.getElementById("totalLessons")
-    .textContent =
-      lessonCount;
-
-
-  document.getElementById("skippedDays")
-    .textContent =
-      skipped;
-
-
-  const scheduleElement =
-    document.getElementById("schedule");
-
-  scheduleElement.innerHTML = "";
-
-
-  schedule.forEach(item => {
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      `schedule-item ${item.type}`;
-
-    row.innerHTML = `
-
-      <div class="schedule-date">
-        ${item.date}
-      </div>
-
-      <div class="schedule-status">
-        ${item.status}
-      </div>
-
-    `;
-
-    scheduleElement.appendChild(row);
-
-  });
-
-
-  /* 自動捲到結果 */
-
-  result.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-
-}
-
-
-/* =========================
-   計算按鈕
-========================= */
-
-document
-  .getElementById("calculateBtn")
-  .addEventListener(
-    "click",
-    calculateCourse
-  );
-
-
-/* =========================
-   預設開始日期
-========================= */
-
-const today =
-  new Date();
-
-document.getElementById("startDate")
-  .value =
-    formatDate(today);
-
-
-/* 初始載入 */
-
-renderCustomHolidays();
-
-</script>
-
-</body>
-</html>
+fu
