@@ -84,7 +84,6 @@
       cursor: pointer;
       background: #fff;
       font-weight: 500;
-      transition: 0.15s;
     }
 
     .weekday input:checked + label {
@@ -112,10 +111,6 @@
     #saveBtn {
       background: #e8f3ff;
       color: #1769aa;
-    }
-
-    button:active {
-      transform: scale(0.99);
     }
 
     #result {
@@ -285,6 +280,7 @@
   <button id="calculateBtn">📅 計算課程日期</button>
 
   <div id="result">
+
     <h2>📋 課程結果</h2>
 
     <div>
@@ -309,6 +305,7 @@
     <button id="saveBtn">☁️ 儲存到 Notion</button>
 
     <div id="message" class="message"></div>
+
   </div>
 
 </div>
@@ -316,221 +313,238 @@
 
 <script>
 
-  /*
-   * ==========================================
-   * ⭐⭐⭐ 只需要確認這裡
-   * ==========================================
-   *
-   * 把這裡換成你剛剛成功顯示
-   * 「ClassFlow API OK」
-   * 的 Web App URL。
-   */
+// ==========================================
+// Notion Web App
+// ==========================================
 
-  const NOTION_API_URL =
-    "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
+const NOTION_API_URL =
+  "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
 
 
-  /*
-   * ==========================================
-   * 2026 國定假日
-   * ==========================================
-   */
+// ==========================================
+// 2026 假日
+// ==========================================
 
-  const holidays2026 = [
+const holidays2026 = [
 
-    "2026-01-01",
+  "2026-01-01",
 
-    "2026-02-14",
-    "2026-02-15",
-    "2026-02-16",
-    "2026-02-17",
-    "2026-02-18",
-    "2026-02-19",
-    "2026-02-20",
-    "2026-02-21",
-    "2026-02-22",
+  "2026-02-14",
+  "2026-02-15",
+  "2026-02-16",
+  "2026-02-17",
+  "2026-02-18",
+  "2026-02-19",
+  "2026-02-20",
+  "2026-02-21",
+  "2026-02-22",
 
-    "2026-02-27",
-    "2026-02-28",
+  "2026-02-27",
+  "2026-02-28",
 
-    "2026-04-03",
-    "2026-04-04",
-    "2026-04-05",
-    "2026-04-06",
+  "2026-04-03",
+  "2026-04-04",
+  "2026-04-05",
+  "2026-04-06",
 
-    "2026-05-01",
+  "2026-05-01",
 
-    "2026-06-19",
+  "2026-06-19",
 
-    "2026-09-25",
-    "2026-09-28",
+  "2026-09-25",
+  "2026-09-28",
 
-    "2026-10-09",
-    "2026-10-10",
+  "2026-10-09",
+  "2026-10-10",
 
-    "2026-10-25",
-    "2026-10-26",
+  "2026-10-25",
+  "2026-10-26",
 
-    "2026-12-25"
+  "2026-12-25"
+];
+
+
+// ==========================================
+// 2027 假日
+// ==========================================
+
+const holidays2027 = [
+
+  "2027-01-01",
+  "2027-01-02",
+  "2027-01-03",
+
+  "2027-02-04",
+  "2027-02-05",
+  "2027-02-06",
+  "2027-02-07",
+  "2027-02-08",
+  "2027-02-09",
+  "2027-02-10",
+
+  "2027-02-27",
+  "2027-02-28",
+  "2027-03-01",
+
+  "2027-04-03",
+  "2027-04-04",
+  "2027-04-05",
+  "2027-04-06",
+
+  "2027-04-30",
+  "2027-05-01",
+  "2027-05-02",
+
+  "2027-10-09",
+  "2027-10-10",
+  "2027-10-11",
+
+  "2027-10-23",
+  "2027-10-24",
+  "2027-10-25",
+
+  "2027-12-24",
+  "2027-12-25",
+  "2027-12-26",
+
+  "2027-12-31"
+];
+
+
+const holidays = new Set([
+  ...holidays2026,
+  ...holidays2027
+]);
+
+
+let calculatedData = null;
+
+
+// ==========================================
+// 日期格式
+// ==========================================
+
+function formatDate(date) {
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(date.getMonth() + 1).padStart(2, "0");
+
+  const day =
+    String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+
+// ==========================================
+// 星期
+// ==========================================
+
+function getWeekdayName(date) {
+
+  const names = [
+    "星期日",
+    "星期一",
+    "星期二",
+    "星期三",
+    "星期四",
+    "星期五",
+    "星期六"
   ];
 
-
-  /*
-   * ==========================================
-   * 2027 國定假日
-   * ==========================================
-   */
-
-  const holidays2027 = [
-
-    "2027-01-01",
-    "2027-01-02",
-    "2027-01-03",
-
-    "2027-02-04",
-    "2027-02-05",
-    "2027-02-06",
-    "2027-02-07",
-    "2027-02-08",
-    "2027-02-09",
-    "2027-02-10",
-
-    "2027-02-27",
-    "2027-02-28",
-    "2027-03-01",
-
-    "2027-04-03",
-    "2027-04-04",
-    "2027-04-05",
-    "2027-04-06",
-
-    "2027-04-30",
-    "2027-05-01",
-    "2027-05-02",
-
-    "2027-10-09",
-    "2027-10-10",
-    "2027-10-11",
-
-    "2027-10-23",
-    "2027-10-24",
-    "2027-10-25",
-
-    "2027-12-24",
-    "2027-12-25",
-    "2027-12-26",
-
-    "2027-12-31"
-  ];
+  return names[date.getDay()];
+}
 
 
-  const holidays = new Set([
-    ...holidays2026,
-    ...holidays2027
-  ]);
+// ==========================================
+// 自訂假日
+// ==========================================
 
+function getCustomHolidays() {
 
-  let calculatedData = null;
+  const text =
+    document
+      .getElementById("customHolidays")
+      .value
+      .trim();
 
-
-  /*
-   * ==========================================
-   * 工具：日期轉 YYYY-MM-DD
-   * ==========================================
-   */
-
-  function formatDate(date) {
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+  if (!text) {
+    return new Set();
   }
 
-
-  /*
-   * ==========================================
-   * 工具：星期
-   * ==========================================
-   */
-
-  function getWeekdayName(date) {
-
-    const names = [
-      "星期日",
-      "星期一",
-      "星期二",
-      "星期三",
-      "星期四",
-      "星期五",
-      "星期六"
-    ];
-
-    return names[date.getDay()];
-  }
-
-
-  /*
-   * ==========================================
-   * 取得自訂假日
-   * ==========================================
-   */
-
-  function getCustomHolidays() {
-
-    const text =
-      document.getElementById("customHolidays").value.trim();
-
-    if (!text) {
-      return new Set();
-    }
-
-    const dates = text
+  const dates =
+    text
       .split(",")
       .map(item => item.trim())
       .filter(Boolean);
 
-    return new Set(dates);
-  }
+  return new Set(dates);
+}
 
 
-  /*
-   * ==========================================
-   * 判斷是否為假日
-   * ==========================================
-   */
+// ==========================================
+// 判斷假日
+// ==========================================
 
-  function isHoliday(date, customHolidays) {
+function isHoliday(date, customHolidays) {
 
-    const dateString = formatDate(date);
+  const dateString =
+    formatDate(date);
 
-    return (
-      holidays.has(dateString) ||
-      customHolidays.has(dateString)
+  return (
+    holidays.has(dateString) ||
+    customHolidays.has(dateString)
+  );
+}
+
+
+// ==========================================
+// 取得上課日
+// ==========================================
+
+function getSelectedWeekdays() {
+
+  const checkboxes =
+    document.querySelectorAll(
+      '.weekday input[type="checkbox"]:checked'
     );
-  }
+
+  return Array.from(checkboxes)
+    .map(checkbox => checkbox.value);
+}
 
 
-  /*
-   * ==========================================
-   * 取得選擇的上課日
-   * ==========================================
-   */
+// ==========================================
+// 星期文字 → 數字
+// ==========================================
 
-  function getSelectedWeekdays() {
+function weekdayToNumber(name) {
 
-    const checkboxes =
-      document.querySelectorAll(
-        '.weekday input[type="checkbox"]:checked'
-      );
+  const map = {
 
-    return Array.from(checkboxes)
-      .map(checkbox => checkbox.value);
-  }
+    "星期日": 0,
+    "星期一": 1,
+    "星期二": 2,
+    "星期三": 3,
+    "星期四": 4,
+    "星期五": 5,
+    "星期六": 6
+
+  };
+
+  return map[name];
+
+}
 
 
-  /*
-   * ==========================================
-   * 計算課程日期
-   * =====================
+// ==========================================
+// 計算課程日期
+// ==========================================
+
+function calculateCourseDates() {
+
+  const startDateValue =
+    document.getElementById("sta
