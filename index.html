@@ -544,13 +544,258 @@ function weekdayToNumber(name) {
 // 計算課程日期
 // ==========================================
 
+<script>
+
+// ==========================================
+// Notion Web App
+// ==========================================
+
+const NOTION_API_URL =
+  "https://script.google.com/macros/s/AKfycbwkdB9w58kiRpT0Hiz6p9o_mwIvwZlXjieWjOEnxnpHUNsmB0GRfP7JiGqJkIUCexdz/exec";
+
+
+// ==========================================
+// 2026 假日
+// ==========================================
+
+const holidays2026 = [
+  "2026-01-01",
+
+  "2026-02-14",
+  "2026-02-15",
+  "2026-02-16",
+  "2026-02-17",
+  "2026-02-18",
+  "2026-02-19",
+  "2026-02-20",
+  "2026-02-21",
+  "2026-02-22",
+
+  "2026-02-27",
+  "2026-02-28",
+
+  "2026-04-03",
+  "2026-04-04",
+  "2026-04-05",
+  "2026-04-06",
+
+  "2026-05-01",
+  "2026-06-19",
+
+  "2026-09-25",
+  "2026-09-28",
+
+  "2026-10-09",
+  "2026-10-10",
+
+  "2026-10-25",
+  "2026-10-26",
+
+  "2026-12-25"
+];
+
+
+// ==========================================
+// 2027 假日
+// ==========================================
+
+const holidays2027 = [
+  "2027-01-01",
+  "2027-01-02",
+  "2027-01-03",
+
+  "2027-02-04",
+  "2027-02-05",
+  "2027-02-06",
+  "2027-02-07",
+  "2027-02-08",
+  "2027-02-09",
+  "2027-02-10",
+
+  "2027-02-27",
+  "2027-02-28",
+  "2027-03-01",
+
+  "2027-04-03",
+  "2027-04-04",
+  "2027-04-05",
+  "2027-04-06",
+
+  "2027-04-30",
+  "2027-05-01",
+  "2027-05-02",
+
+  "2027-10-09",
+  "2027-10-10",
+  "2027-10-11",
+
+  "2027-10-23",
+  "2027-10-24",
+  "2027-10-25",
+
+  "2027-12-24",
+  "2027-12-25",
+  "2027-12-26",
+
+  "2027-12-31"
+];
+
+const holidays = new Set([
+  ...holidays2026,
+  ...holidays2027
+]);
+
+let calculatedData = null;
+
+
+// ==========================================
+// 日期格式
+// ==========================================
+
+function formatDate(date) {
+
+  const year = date.getFullYear();
+
+  const month =
+    String(date.getMonth() + 1).padStart(2, "0");
+
+  const day =
+    String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+
+// ==========================================
+// 星期
+// ==========================================
+
+function getWeekdayName(date) {
+
+  const names = [
+    "星期日",
+    "星期一",
+    "星期二",
+    "星期三",
+    "星期四",
+    "星期五",
+    "星期六"
+  ];
+
+  return names[date.getDay()];
+}
+
+
+// ==========================================
+// 自訂假日
+// ==========================================
+
+function getCustomHolidays() {
+
+  const text =
+    document
+      .getElementById("customHolidays")
+      .value
+      .trim();
+
+  if (!text) {
+    return new Set();
+  }
+
+  return new Set(
+    text
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean)
+  );
+}
+
+
+// ==========================================
+// 判斷假日
+// ==========================================
+
+function isHoliday(date, customHolidays) {
+
+  const dateString = formatDate(date);
+
+  return (
+    holidays.has(dateString) ||
+    customHolidays.has(dateString)
+  );
+}
+
+
+// ==========================================
+// 取得選擇的上課日
+// ==========================================
+
+function getSelectedWeekdays() {
+
+  const checkboxes =
+    document.querySelectorAll(
+      '.weekday input[type="checkbox"]:checked'
+    );
+
+  return Array.from(checkboxes)
+    .map(checkbox => checkbox.value);
+}
+
+
+// ==========================================
+// 星期文字轉數字
+// ==========================================
+
+function weekdayToNumber(name) {
+
+  const map = {
+    "星期日": 0,
+    "星期一": 1,
+    "星期二": 2,
+    "星期三": 3,
+    "星期四": 4,
+    "星期五": 5,
+    "星期六": 6
+  };
+
+  return map[name];
+}
+
+
+// ==========================================
+// 顯示訊息
+// ==========================================
+
+function showMessage(text, type) {
+
+  const message =
+    document.getElementById("message");
+
+  if (!text) {
+    message.style.display = "none";
+    message.textContent = "";
+    return;
+  }
+
+  message.textContent = text;
+  message.className = "message " + type;
+  message.style.display = "block";
+}
+
+
+// ==========================================
+// 計算課程日期
+// ==========================================
+
 function calculateCourseDates() {
 
   const startDateValue =
     document.getElementById("startDate").value;
 
   const lessonCount =
-    Number(document.getElementById("lessonCount").value);
+    Number(
+      document.getElementById("lessonCount").value
+    );
 
   const weekdays =
     getSelectedWeekdays();
@@ -558,26 +803,42 @@ function calculateCourseDates() {
   const customHolidays =
     getCustomHolidays();
 
-  // 檢查開始日期
+
+  // -------------------------
+  // 檢查資料
+  // -------------------------
+
   if (!startDateValue) {
-    showMessage("請先選擇開始日期", "error");
+    showMessage(
+      "請先選擇開始日期",
+      "error"
+    );
     return;
   }
 
-  // 檢查堂數
   if (!lessonCount || lessonCount < 1) {
-    showMessage("請輸入正確的總堂數", "error");
+    showMessage(
+      "請輸入正確的總堂數",
+      "error"
+    );
     return;
   }
 
-  // 檢查上課日
   if (weekdays.length === 0) {
-    showMessage("請至少選擇一個上課日", "error");
+    showMessage(
+      "請至少選擇一個上課日",
+      "error"
+    );
     return;
   }
 
-  // 避免日期被時區影響
-  const parts = startDateValue.split("-");
+
+  // -------------------------
+  // 建立開始日期
+  // -------------------------
+
+  const parts =
+    startDateValue.split("-");
 
   let currentDate =
     new Date(
@@ -586,12 +847,16 @@ function calculateCourseDates() {
       Number(parts[2])
     );
 
+
+  // -------------------------
+  // 計算日期
+  // -------------------------
+
   const courseDates = [];
 
   const weekdayNumbers =
     weekdays.map(weekdayToNumber);
 
-  // 最多往後找 3 年，避免程式無限跑
   let safetyCounter = 0;
 
   while (
@@ -602,16 +867,17 @@ function calculateCourseDates() {
     const day =
       currentDate.getDay();
 
-    const dateString =
-      formatDate(currentDate);
-
-    // 是上課日，而且不是假日
     if (
       weekdayNumbers.includes(day) &&
-      !isHoliday(currentDate, customHolidays)
+      !isHoliday(
+        currentDate,
+        customHolidays
+      )
     ) {
 
-      courseDates.push(dateString);
+      courseDates.push(
+        formatDate(currentDate)
+      );
 
     }
 
@@ -622,22 +888,33 @@ function calculateCourseDates() {
     safetyCounter++;
   }
 
-  // 防止異常
+
+  // -------------------------
+  // 確認計算成功
+  // -------------------------
+
   if (courseDates.length !== lessonCount) {
 
     showMessage(
-      "課程日期計算失敗，請確認開始日期與上課日設定。",
+      "課程日期計算失敗，請確認設定。",
       "error"
     );
 
     return;
   }
 
+
+  // -------------------------
   // 儲存計算結果
+  // -------------------------
+
   calculatedData = {
 
     studentName:
-      document.getElementById("studentName").value.trim(),
+      document
+        .getElementById("studentName")
+        .value
+        .trim(),
 
     period:
       document.getElementById("period").value,
@@ -668,11 +945,15 @@ function calculateCourseDates() {
 
     courseDates:
       courseDates
-
   };
 
-  // 顯示結果
-  document.getElementById("result").style.display = "block";
+
+  // -------------------------
+  // 顯示結果區
+  // -------------------------
+
+  document.getElementById("result").style.display =
+    "block";
 
   document.getElementById("resultStart").textContent =
     courseDates[0];
@@ -683,7 +964,11 @@ function calculateCourseDates() {
   document.getElementById("resultCount").textContent =
     courseDates.length + " 堂";
 
+
+  // -------------------------
   // 顯示每一堂課
+  // -------------------------
+
   const schedule =
     document.getElementById("schedule");
 
@@ -691,11 +976,14 @@ function calculateCourseDates() {
 
   courseDates.forEach(function(date, index) {
 
+    const dateParts =
+      date.split("-");
+
     const dateObj =
       new Date(
-        date.substring(0, 4),
-        Number(date.substring(5, 7)) - 1,
-        date.substring(8, 10)
+        Number(dateParts[0]),
+        Number(dateParts[1]) - 1,
+        Number(dateParts[2])
       );
 
     const div =
@@ -713,36 +1001,8 @@ function calculateCourseDates() {
 
   });
 
-  // 清除錯誤訊息
+
   showMessage("", "");
-
-}
-
-
-// ==========================================
-// 顯示訊息
-// ==========================================
-
-function showMessage(text, type) {
-
-  const message =
-    document.getElementById("message");
-
-  if (!text) {
-
-    message.style.display = "none";
-    message.textContent = "";
-
-    return;
-  }
-
-  message.textContent = text;
-
-  message.className =
-    "message " + type;
-
-  message.style.display = "block";
-
 }
 
 
@@ -752,11 +1012,10 @@ function showMessage(text, type) {
 
 document
   .getElementById("calculateBtn")
-  .addEventListener("click", function() {
-
-    calculateCourseDates();
-
-  });
+  .addEventListener(
+    "click",
+    calculateCourseDates
+  );
 
 
 // ==========================================
@@ -765,71 +1024,78 @@ document
 
 document
   .getElementById("saveBtn")
-  .addEventListener("click", async function() {
+  .addEventListener(
+    "click",
+    async function() {
 
-    // 還沒有計算
-    if (!calculatedData) {
+      if (!calculatedData) {
 
-      showMessage(
-        "請先按「📅 計算課程日期」",
-        "error"
-      );
+        showMessage(
+          "請先按「📅 計算課程日期」",
+          "error"
+        );
 
-      return;
+        return;
+      }
+
+
+      const saveBtn =
+        document.getElementById("saveBtn");
+
+      saveBtn.disabled = true;
+      saveBtn.textContent =
+        "⏳ 儲存中...";
+
+
+      try {
+
+        await fetch(
+          NOTION_API_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body:
+              JSON.stringify(calculatedData),
+
+            mode: "no-cors"
+          }
+        );
+
+
+        showMessage(
+          "✅ 已送出儲存請求，請到 Notion 查看資料。",
+          "success"
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "❌ 儲存失敗：" +
+          error.message,
+          "error"
+        );
+
+      } finally {
+
+        saveBtn.disabled = false;
+
+        saveBtn.textContent =
+          "☁️ 儲存到 Notion";
+
+      }
+
     }
-
-    const saveBtn =
-      document.getElementById("saveBtn");
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "⏳ 儲存中...";
-
-    try {
-
-      await fetch(
-        NOTION_API_URL,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "text/plain;charset=utf-8"
-          },
-
-          body:
-            JSON.stringify(calculatedData),
-
-          mode: "no-cors"
-        }
-      );
-
-      // no-cors 無法讀取 Google Apps Script 回傳內容，
-      // 但請求本身已送出
-      showMessage(
-        "✅ 已送出儲存請求，請到 Notion 查看資料。",
-        "success"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "❌ 儲存失敗：" + error.message,
-        "error"
-      );
-
-    } finally {
-
-      saveBtn.disabled = false;
-      saveBtn.textContent = "☁️ 儲存到 Notion";
-
-    }
-
-  });
+  );
 
 </script>
 
 </body>
 </html>
-
