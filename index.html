@@ -270,7 +270,36 @@
     id="customHolidays"
     placeholder="例如：2027-06-01, 2027-06-15"
   >
+<label>💰 收費資料</label>
 
+<div style="margin-top: 8px;">
+
+  <label style="font-weight: 500; margin-top: 8px;">
+    <input
+      type="checkbox"
+      id="feeBill"
+      style="width: auto; margin-right: 8px;"
+    >
+    收費單
+  </label>
+
+  <label style="font-weight: 500; margin-top: 8px;">
+    <input
+      type="checkbox"
+      id="textbook"
+      style="width: auto; margin-right: 8px;"
+    >
+    教材
+  </label>
+
+</div>
+
+<label for="textbookInfo">📚 教材冊數及金額</label>
+<input
+  type="text"
+  id="textbookInfo"
+  placeholder="例如：2冊／600元"
+>
   <label for="note">📝 備註</label>
   <textarea
     id="note"
@@ -940,8 +969,23 @@ function calculateCourseDates() {
     weekdays:
       weekdays,
 
+       // 收費單
+    feeBill:
+      document.getElementById("feeBill").checked,
+
+    // 教材
+    textbook:
+      document.getElementById("textbook").checked,
+
+    // 教材冊數及金額
+    textbookInfo:
+      document.getElementById("textbookInfo").value.trim(),
+
+    // 備註
     note:
-      document.getElementById("note").value.trim(),
+      document
+        .getElementById("note")
+        .value.trim(),
 
     courseDates:
       courseDates
